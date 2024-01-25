@@ -30,8 +30,8 @@ const createTask = async (task) => {
 
 const updateTask = async (id, task) => {
     try {
-        const { title, description, completed, created_at } = task;
-        const updatedTask = await db.one("UPDATE tasks SET title=$1, description=$2, completed=$3, created_at=$4 WHERE task_id=$5 RETURNING *", [title, description, completed, created_at, id]);
+        const { title, description, completed } = task;
+        const updatedTask = await db.one("UPDATE tasks SET title=$1, description=$2, completed=$3, created_at=$4 WHERE task_id=$5 RETURNING *", [title, description, completed, new Date(), id]);
         return updatedTask;
     } catch (err) {
         return err;

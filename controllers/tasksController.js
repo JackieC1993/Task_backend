@@ -26,7 +26,7 @@ tasks.post('/', async (req, res) => {
         const createdTask = await createTask(req.body);
         res.status(201).json(createdTask);
     } catch (err) {
-        res.status(500).json({ error: "Internal Server Error" });
+        res.status(404).json({ error: "Internal Server Error" });
     }
 });
 
