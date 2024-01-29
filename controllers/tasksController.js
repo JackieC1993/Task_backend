@@ -1,53 +1,57 @@
-const express = require('express');
-const tasks = express.Router();
-const { getAllTask, getTask, createTask, updateTask, deleteTask } = require('../queries/tasks');
+const express = require('express')
+const tasks = express.Router({ mergeParams: true })
+const { getTasks, getTask, createTask, updateTask, deleteTask } = require('../queries/tasks')
+const { authenticateToken } = require('../auth/auth')
 
-tasks.get('/', async (req, res) => {
+
+tasks.get('/', authenticateToken, async (req, res) => {
     try {
-        const allTasks = await getAllTask(); 
-        res.status(200).json(allTasks);
+        const { user_id } = req.params
+        const tasks = await getTasks(user_id)
+        res.status(200).json(tasks)
     } catch (err) {
-        res.status(404).json({ error: err });
+        res.status(404).json({ error: err })
     }
-});
+})
 
-tasks.get('/:id', async (req, res) => {
+tasks.get('/:id', authenticateToken, async (req, res) => {
     try {
-        const { id } = req.params;
-        const task = await getTask(id);
-        res.status(200).json(task);
+        const { id, user_id } = req.params
+        const task = await getTask(id, user_id)
+        res.status(200).json(task)
     } catch (err) {
-        res.status(404).json({ error: err });
+        res.status(404).json({ error: err })
     }
-});
+})
 
-tasks.post('/', async (req, res) => {
+tasks.post('/', authenticateToken, async (req, res) => {
     try {
-        const createdTask = await createTask(req.body);
-        res.status(201).json(createdTask);
+        const createdTask = await createTask(req.body)
+        res.status(201).json(createdTask)
     } catch (err) {
-        res.status(404).json({ error: "Internal Server Error" });
+        res.status(500).json({ error: "Internal Server Error" })
     }
-});
+})
 
-tasks.put('/:id', async (req, res) => {
+tasks.put('/:id', authenticateToken, async (req, res) => {
     try {
-        const { id } = req.params;
-        const updatedTask = await updateTask(id, req.body);
-        res.status(200).json(updatedTask);
+        const { id } = req.params
+        const updatedTask = await updateTask(id, req.body)
+        res.status(200).json(updatedTask)
     } catch (err) {
-        res.status(404).json({ error: err });
+        res.status(404).json({ error: err })
     }
-});
+})
 
-tasks.delete('/:id', async (req, res) => {
+tasks.delete("/:id", authenticateToken, async (req, res) => {
     try {
-        const { id } = req.params;
-        await deleteTask(id); 
-        res.status(200).json({ success: "Successfully deleted task with ID " + id });
+        const { id } = req.params
+        const deletedTask = await deleteTask(id)
+        res.status(200).json({ message: "Successfully deleted task" })
     } catch (err) {
-        res.status(404).json({ error: err });
+        res.status(404).json({ error: err })
     }
-});
+})
 
-module.exports = tasks;
+
+module.exports = tasks

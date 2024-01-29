@@ -1,50 +1,53 @@
-const db = require('../db/dbConfig');
+const db = require('../db/dbConfig')
 
-const getAllTask = async () => {
+const getTasks = async (userId) => {
     try {
-        const tasks = await db.any("SELECT * FROM tasks");
-        return tasks;
-    } catch (error) {
-        return error;
-    }
-}
-
-const getTask = async (id) => {
-    try {
-        const task = await db.one("SELECT * FROM tasks WHERE task_id=$1", id);
-        return task;
+       const tasks = await db.any("SELECT * FROM tasks WHERE user_id=$1", userId)
+       return tasks
     } catch (err) {
-        return err;
+        return err
     }
 }
+
+const getTask = async (id, userId) => {
+    try {
+        const task = await db.one("SELECT * FROM tasks WHERE task_id=$1 AND user_id=$2", [id, userId])
+        return task
+    } catch (err) {
+        return err
+    }
+}
+
 
 const createTask = async (task) => {
     try {
-        const { title, description, completed } = task;
-        const newTask = await db.one("INSERT INTO tasks (title, description, completed, created_at) VALUES ($1, $2, $3, $4) RETURNING *", [title, description, completed, new Date()]);
-        return newTask;
+        const { title, description, user_id } = task
+        const completed = task.completed || false
+        const newTask = await db.one("INSERT INTO tasks (title, description, completed, created_at, user_id) VALUES ($1, $2, $3, $4, $5) RETURNING *", [title, description, completed, new Date(), user_id])
+        return newTask
     } catch (err) {
-        return err;
+        return err
     }
 }
 
 const updateTask = async (id, task) => {
     try {
-        const { title, description, completed } = task;
-        const updatedTask = await db.one("UPDATE tasks SET title=$1, description=$2, completed=$3, created_at=$4 WHERE task_id=$5 RETURNING *", [title, description, completed, new Date(), id]);
-        return updatedTask;
+        const { title, description, completed, created_at, user_id } = task
+        const updatedTask = await db.one("UPDATE tasks SET title=$1, description=$2, completed=$3, created_at=$4, user_id=$5 WHERE task_id=$6 RETURNING *", [title, description, completed, created_at, user_id, id])
+        return updatedTask
     } catch (err) {
-        return err;
+        return err
     }
 }
 
 const deleteTask = async (id) => {
     try {
-        const deletedTask = await db.one("DELETE FROM tasks WHERE task_id=$1 RETURNING *", id);
-        return deletedTask;
+        const deletedTask = await db.one("DELETE FROM tasks WHERE task_id=$1 RETURNING *", id)
+        return deletedTask
     } catch (err) {
-        return err;
+        return err
     }
 }
 
-module.exports = { getAllTask, getTask, createTask, updateTask, deleteTask };
+
+module.exports = { getTasks, getTask, createTask, updateTask, deleteTask }
